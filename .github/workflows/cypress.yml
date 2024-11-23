@@ -21,26 +21,29 @@ jobs:
       with:
         node-version: '16'  # Versão do Node.js que você está usando
 
-    - name: Install dependencies
+    - name: Install dependencies (UI folder)
       run: |
+        cd UI  # Muda para a pasta UI onde está o package.json
         npm install
 
     - name: Run Cypress tests
       run: |
+        cd UI  # Muda para a pasta UI novamente para rodar os testes
         npm run test
 
     - name: Upload Mochawesome reports
       uses: actions/upload-artifact@v3
       with:
         name: mochawesome-reports
-        path: cypress/reports/mochawesome/*.json
+        path: UI/cypress/reports/mochawesome/*.json
 
     - name: Merge Mochawesome reports
       run: |
+        cd UI  # Muda para a pasta UI para rodar o script de merge
         npm run cy:report
 
     - name: Upload final merged report
       uses: actions/upload-artifact@v3
       with:
         name: final-mochawesome-report
-        path: cypress/reports/mochawesome/report.json
+        path: UI/cypress/reports/mochawesome/report.json
