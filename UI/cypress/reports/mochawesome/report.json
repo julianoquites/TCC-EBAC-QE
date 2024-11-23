@@ -1,0 +1,164 @@
+{
+  "stats": {
+    "suites": 1,
+    "tests": 4,
+    "passes": 4,
+    "pending": 0,
+    "failures": 0,
+    "start": "2024-10-11T00:43:54.005Z",
+    "end": "2024-10-11T00:44:04.162Z",
+    "duration": 10157,
+    "testsRegistered": 4,
+    "passPercent": 100,
+    "pendingPercent": 0,
+    "other": 0,
+    "hasOther": false,
+    "skipped": 0,
+    "hasSkipped": false
+  },
+  "results": [
+    {
+      "uuid": "b8f9e5f0-fcd5-49b8-87dc-b6f393eae2a2",
+      "title": "",
+      "fullFile": "cypress\\e2e\\e2e.cy.js",
+      "file": "cypress\\e2e\\e2e.cy.js",
+      "beforeHooks": [],
+      "afterHooks": [],
+      "tests": [],
+      "suites": [
+        {
+          "uuid": "c699be88-472e-404d-8c78-c94dbea52b9b",
+          "title": "Teste de Autenticação",
+          "fullFile": "",
+          "file": "",
+          "beforeHooks": [],
+          "afterHooks": [],
+          "tests": [
+            {
+              "title": "Produtos devem estar visíveis",
+              "fullTitle": "Teste de Autenticação Produtos devem estar visíveis",
+              "timedOut": null,
+              "duration": 4929,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "_home.homePage.openSeeAllProducts();\n_home.homePage.products().should(\"be.visible\");",
+              "err": {},
+              "uuid": "6e124d5a-3960-49e3-92ac-00d89638ae89",
+              "parentUUID": "c699be88-472e-404d-8c78-c94dbea52b9b",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Produto deve ser adicionado ao carrinho",
+              "fullTitle": "Teste de Autenticação Produto deve ser adicionado ao carrinho",
+              "timedOut": null,
+              "duration": 1559,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "_home.homePage.openSeeAllProducts();\n_home.homePage.selectProduct();\n_home.homePage.addProduct();\ncy.get('[data-testid=\"itemsQty\"]').should(\"be.visible\");",
+              "err": {},
+              "uuid": "5fdf75a7-d170-4e12-93f4-894fb226c2ec",
+              "parentUUID": "c699be88-472e-404d-8c78-c94dbea52b9b",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Produto deve ser removido do carrinho",
+              "fullTitle": "Teste de Autenticação Produto deve ser removido do carrinho",
+              "timedOut": null,
+              "duration": 1899,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "_home.homePage.openSeeAllProducts();\n_home.homePage.selectProduct();\n_home.homePage.addProduct();\n_home.homePage.removeProduct();\ncy.get('[data-testid=\"emptyCart\"]').should(\"be.visible\");",
+              "err": {},
+              "uuid": "7b74e342-91b8-49bb-82da-3ad0443b1405",
+              "parentUUID": "c699be88-472e-404d-8c78-c94dbea52b9b",
+              "isHook": false,
+              "skipped": false
+            },
+            {
+              "title": "Produto deve ser atualizado no carrinho",
+              "fullTitle": "Teste de Autenticação Produto deve ser atualizado no carrinho",
+              "timedOut": null,
+              "duration": 1638,
+              "state": "passed",
+              "speed": "fast",
+              "pass": true,
+              "fail": false,
+              "pending": false,
+              "context": null,
+              "code": "_home.homePage.openSeeAllProducts();\n_home.homePage.selectProduct();\n_home.homePage.addProduct();\n_home.homePage.updateProduct();\ncy.get('[data-testid=\"itemsQty\"]').should(\"have.text\", \"2\");",
+              "err": {},
+              "uuid": "1c0cf886-1868-4200-9c47-070495b0b80d",
+              "parentUUID": "c699be88-472e-404d-8c78-c94dbea52b9b",
+              "isHook": false,
+              "skipped": false
+            }
+          ],
+          "suites": [],
+          "passes": [
+            "6e124d5a-3960-49e3-92ac-00d89638ae89",
+            "5fdf75a7-d170-4e12-93f4-894fb226c2ec",
+            "7b74e342-91b8-49bb-82da-3ad0443b1405",
+            "1c0cf886-1868-4200-9c47-070495b0b80d"
+          ],
+          "failures": [],
+          "pending": [],
+          "skipped": [],
+          "duration": 10025,
+          "root": false,
+          "rootEmpty": false,
+          "_timeout": 2000
+        }
+      ],
+      "passes": [],
+      "failures": [],
+      "pending": [],
+      "skipped": [],
+      "duration": 0,
+      "root": true,
+      "rootEmpty": true,
+      "_timeout": 2000
+    }
+  ],
+  "meta": {
+    "mocha": {
+      "version": "7.0.1"
+    },
+    "mochawesome": {
+      "options": {
+        "quiet": false,
+        "reportFilename": "report",
+        "saveHtml": true,
+        "saveJson": true,
+        "consoleReporter": "spec",
+        "useInlineDiffs": false,
+        "code": true
+      },
+      "version": "7.1.3"
+    },
+    "marge": {
+      "options": {
+        "reportDir": "cypress/reports/mochawesome",
+        "reportFilename": "report",
+        "overwrite": false,
+        "html": true,
+        "json": true,
+        "charts": true
+      },
+      "version": "6.2.0"
+    }
+  }
+}

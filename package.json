@@ -1,0 +1,21 @@
+{
+  "name": "tcc-ebac-qe",
+  "version": "1.0.0",
+  "description": "Trabalho de Conclusão de Curso de Engenharia de Software - EBAC",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx cypress run",
+    "start": "npx serverest",
+    "cy:report": "mochawesome-merge ./cypress/reports/mochawesome/*.json > ./cypress/reports/mochawesome/report.json"
+  },
+  "author": "julianoquites",
+  "license": "ISC",
+  "dependencies": {
+    "cypress": "^13.6.3",
+    "cypress-mochawesome-reporter": "^3.8.2",
+    "mochawesome-merge": "^4.3.0"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^9.0.0"
+  }
+}
