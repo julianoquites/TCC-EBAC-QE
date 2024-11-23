@@ -34,7 +34,13 @@ jobs:
           cd UI
           npm run test  # Executa os testes Cypress
 
-      # Gerar o relatório HTML diretamente (sem usar o merge do JSON)
+      # Verificar se o relatório foi gerado
+      - name: List reports directory
+        run: |
+          cd UI
+          ls -l ./cypress/reports/mochawesome  # Verifica se o arquivo HTML ou JSON foi gerado
+
+      # Gerar o relatório HTML diretamente (sem usar JSON)
       - name: Generate Mochawesome HTML report
         run: |
           cd UI
