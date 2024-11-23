@@ -1,54 +1,47 @@
-name: Run Cypress Tests and Generate HTML Report
+name: Deploy Mochawesome Report to GitHub Pages
 
 on:
   push:
     branches:
-      - main  # Ou a branch em que você deseja rodar os testes
-  pull_request:
-    branches:
-      - main  # Ou a branch em que você deseja rodar os testes
+      - main  # Substitua 'main' pelo nome da sua branch principal, se necessário.
 
 jobs:
-  cypress-run:
-    runs-on: ubuntu-latest  # Ou outro ambiente conforme necessário
+  deploy:
+    runs-on: ubuntu-latest
 
     steps:
-      # Checkout do código
-      - name: Checkout code
+      # Checkout do repositório
+      - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Instalar dependências do Node.js
-      - name: Set up Node.js
+      # Configurar o Node.js
+      - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'  # Altere para a versão do Node que você está utilizando
+          node-version: 18
 
-      - name: Install dependencies
+      # Instalar dependências
+      - name: Install Dependencies
         run: |
           cd UI
-          npm install  # Instala as dependências definidas no package.json
+          npm install
 
-      # Rodar os testes Cypress
-      - name: Run Cypress tests
+      # Executar os testes e gerar o relatório
+      - name: Run Tests and Generate Report
         run: |
           cd UI
-          npm run test  # Executa os testes Cypress
+          npx cypress run
 
-      # Verificar se o relatório foi gerado
-      - name: List reports directory
+      # Copiar o arquivo HTML e assets para o diretório gh-pages
+      - name: Prepare Report for Deployment
         run: |
-          cd UI
-          ls -l ./cypress/reports/mochawesome  # Verifica se o arquivo HTML ou JSON foi gerado
+          mkdir -p gh-pages
+          cp UI/cypress/reports/mochawesome/report.html gh-pages/
+          cp -r UI/cypress/reports/mochawesome/assets gh-pages/
 
-      # Gerar o relatório HTML diretamente (sem usar JSON)
-      - name: Generate Mochawesome HTML report
-        run: |
-          cd UI
-          npx mochawesome-report-generator ./cypress/reports/mochawesome/*.json --reportDir ./cypress/reports/mochawesome --reportFilename report.html
-
-      # Publicar o relatório no GitHub Pages
-      - name: Deploy report to GitHub Pages
-        uses: JamesIves/github-pages-deploy-action@v4
+      # Deploy para o GitHub Pages
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          branch: gh-pages
-          folder: UI/cypress/reports/mochawesome
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: gh-pages
