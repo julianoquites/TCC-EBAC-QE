@@ -4,9 +4,7 @@
   "description": "Trabalho de Conclusão de Curso de Engenharia de Software - EBAC",
   "main": "index.js",
   "scripts": {
-    "test": "npx cypress run",
-    "start": "npx serverest",
-    "cy:report": "mochawesome-merge ./cypress/reports/mochawesome/*.json > ./cypress/reports/mochawesome/report.json"
+    "test": "npx cypress run"
   },
   "author": "julianoquites",
   "license": "ISC",
