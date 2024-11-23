@@ -10,7 +10,7 @@ module.exports = defineConfig({
     overwrite: true,
     html: true,
     json: true,
-    charts: true,
+    charts: true
   },
   e2e: {
     baseUrl: "http://lojaebac.ebaconline.art.br/", // URL base para os testes

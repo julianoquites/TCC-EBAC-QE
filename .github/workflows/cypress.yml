@@ -1,49 +1,48 @@
-name: Cypress Tests
+name: Run Cypress Tests and Generate HTML Report
 
 on:
   push:
     branches:
-      - main  # Ou a branch que você deseja monitorar
+      - main  # Ou a branch em que você deseja rodar os testes
   pull_request:
     branches:
-      - main  # Ou a branch que você deseja monitorar
+      - main  # Ou a branch em que você deseja rodar os testes
 
 jobs:
-  cypress:
-    runs-on: ubuntu-latest
+  cypress-run:
+    runs-on: ubuntu-latest  # Ou outro ambiente conforme necessário
 
     steps:
-    - name: Check out the repository
-      uses: actions/checkout@v3
+      # Checkout do código
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: '16'  # Versão do Node.js que você está usando
+      # Instalar dependências do Node.js
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'  # Altere para a versão do Node que você está utilizando
 
-    - name: Install dependencies (UI folder)
-      run: |
-        cd UI  # Muda para a pasta UI onde está o package.json
-        npm install
+      - name: Install dependencies
+        run: |
+          cd UI
+          npm install  # Instala as dependências definidas no package.json
 
-    - name: Run Cypress tests
-      run: |
-        cd UI  # Muda para a pasta UI novamente para rodar os testes
-        npm run test
+      # Rodar os testes Cypress
+      - name: Run Cypress tests
+        run: |
+          cd UI
+          npm run test  # Executa os testes Cypress
 
-    - name: Upload Mochawesome reports
-      uses: actions/upload-artifact@v3
-      with:
-        name: mochawesome-reports
-        path: UI/cypress/reports/mochawesome/*.json
+      # Gerar o relatório HTML diretamente (sem usar o merge do JSON)
+      - name: Generate Mochawesome HTML report
+        run: |
+          cd UI
+          npx mochawesome-report-generator ./cypress/reports/mochawesome/*.json --reportDir ./cypress/reports/mochawesome --reportFilename report.html
 
-    - name: Merge Mochawesome reports
-      run: |
-        cd UI  # Muda para a pasta UI para rodar o script de merge
-        npm run cy:report
-
-    - name: Upload final merged report
-      uses: actions/upload-artifact@v3
-      with:
-        name: final-mochawesome-report
-        path: UI/cypress/reports/mochawesome/report.json
+      # Publicar o relatório no GitHub Pages
+      - name: Deploy report to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: UI/cypress/reports/mochawesome
