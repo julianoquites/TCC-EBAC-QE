@@ -3,45 +3,27 @@ name: Deploy Mochawesome Report to GitHub Pages
 on:
   push:
     branches:
-      - main  # Substitua 'main' pelo nome da sua branch principal, se necessário.
+      - main
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      # Checkout do repositório
       - name: Checkout Repository
         uses: actions/checkout@v3
 
-      # Configurar o Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
-      # Instalar dependências
       - name: Install Dependencies
         run: |
           cd UI
           npm install
 
-      # Executar os testes e gerar o relatório
       - name: Run Tests and Generate Report
         run: |
           cd UI
           npx cypress run
-
-      # Copiar o arquivo HTML e assets para o diretório gh-pages
-      - name: Prepare Report for Deployment
-        run: |
-          mkdir -p gh-pages
-          cp UI/cypress/reports/mochawesome/report.html gh-pages/
-          cp -r UI/cypress/reports/mochawesome/assets gh-pages/
-
-      # Deploy para o GitHub Pages
-      - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: gh-pages
