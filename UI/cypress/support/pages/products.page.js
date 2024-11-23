@@ -17,7 +17,4 @@ export const productsPage = {
   getNoResultsMessage() {
     return cy.get(".woocommerce-info");
   },
-  updateProduct() {
-    cy.get('[data-testid="addItem"]').click();
-  },
 };
