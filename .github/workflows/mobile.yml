@@ -37,8 +37,8 @@ jobs:
           distribution: 'temurin'
           java-version: '11'
 
-      # Configuração do emulador Android separada em dois passos
-      - name: Setup Android Emulator
+      # Configuração do emulador Android
+      - name: Setup and Run Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 28
@@ -48,26 +48,24 @@ jobs:
           cores: 2
           ram-size: 2048M
           heap-size: 512M
-          sdcard-path-size: 512M
+          sdcard-path-or-size: 512M  # Entrada correta
           disk-size: 2048M
-          emulator-boot-timeout: 900  # 15 minutos de timeout
-
-      - name: Configure Android Emulator
-        run: |
-          echo "Starting emulator boot sequence..."
-          adb devices
-          echo "Waiting for device to boot completely..."
-          adb wait-for-device
-          adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
-          sleep 30  # Espera adicional para garantir
-          echo "Configuring device settings..."
-          adb shell settings put global window_animation_scale 0.0
-          adb shell settings put global transition_animation_scale 0.0
-          adb shell settings put global animator_duration_scale 0.0
-          echo "Device is ready!"
-          adb shell getprop ro.build.version.release
-          adb shell getprop ro.build.version.sdk
-          adb devices
+          emulator-boot-timeout: 900
+          script: |
+            echo "Starting emulator boot sequence..."
+            adb devices
+            echo "Waiting for device to boot completely..."
+            adb wait-for-device
+            adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
+            sleep 30  # Espera adicional para garantir
+            echo "Configuring device settings..."
+            adb shell settings put global window_animation_scale 0.0
+            adb shell settings put global transition_animation_scale 0.0
+            adb shell settings put global animator_duration_scale 0.0
+            echo "Device is ready!"
+            adb shell getprop ro.build.version.release
+            adb shell getprop ro.build.version.sdk
+            adb devices
 
       - name: Install Appium Drivers
         run: |
