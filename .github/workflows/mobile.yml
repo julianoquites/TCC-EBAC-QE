@@ -11,38 +11,34 @@ on:
 jobs:
   run-mobile-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 60  # Aumentado para garantir tempo suficiente
+    timeout-minutes: 60  # Aumentado para dar mais tempo
 
     steps:
-      # Fazendo o checkout do código
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           lfs: true
 
-      # Configurando o ambiente Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
 
-      # Instalando dependências do projeto e Appium
       - name: Install dependencies
         run: |
           cd Mobile
           npm ci
           npm install -g appium
 
-      # Configurando Java para o ambiente Android
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '11'
 
-      # Configurando o emulador Android com ajustes personalizados
-      - name: Setup and Run Android Emulator
+      # Configuração do emulador Android separada em dois passos
+      - name: Setup Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 28
@@ -54,59 +50,65 @@ jobs:
           heap-size: 512M
           sdcard-path-size: 512M
           disk-size: 2048M
-          emulator-boot-timeout: 900
+          emulator-boot-timeout: 900  # 15 minutos de timeout
+
+      - name: Configure Android Emulator
         run: |
-          echo "Waiting for emulator to boot completely..."
+          echo "Starting emulator boot sequence..."
           adb devices
+          echo "Waiting for device to boot completely..."
           adb wait-for-device
           adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
-          sleep 30
-          echo "Optimizing device animations..."
+          sleep 30  # Espera adicional para garantir
+          echo "Configuring device settings..."
           adb shell settings put global window_animation_scale 0.0
           adb shell settings put global transition_animation_scale 0.0
           adb shell settings put global animator_duration_scale 0.0
+          echo "Device is ready!"
+          adb shell getprop ro.build.version.release
+          adb shell getprop ro.build.version.sdk
+          adb devices
 
-      # Instalando drivers do Appium
       - name: Install Appium Drivers
         run: |
           cd Mobile
           appium driver install uiautomator2
           appium driver list
 
-      # Inicializando o servidor Appium
       - name: Start Appium Server
         run: |
           cd Mobile
           appium --log-level debug &
           echo "Waiting for Appium to start..."
-          sleep 30
+          sleep 30  # Aumentado para garantir que o Appium esteja pronto
 
-      # Verificação do ambiente configurado
       - name: Verify Environment
         run: |
-          echo "Verifying environment..."
+          cd Mobile
+          echo "Checking ADB devices..."
           adb devices
-          adb shell getprop ro.build.version.release
-          adb shell pm list packages | grep -i ebac || true
+          echo "Checking Appium status..."
           curl --retry 3 --retry-delay 5 http://localhost:4723/status || true
+          echo "Checking device properties..."
+          adb shell getprop ro.build.version.release
+          echo "Listing installed packages..."
+          adb shell pm list packages | grep -i ebac || true
         continue-on-error: true
 
-      # Executando os testes
       - name: Run Mobile Tests
         run: |
           cd Mobile
+          echo "Starting tests..."
           npm test
         env:
           CI: true
 
-      # Gerando relatório Allure
       - name: Generate Allure Report
         if: always()
         run: |
           cd Mobile
           npm run allure
 
-      # Fazendo upload dos resultados do Allure
       - name: Upload Allure Results
         if: always()
         uses: actions/upload-artifact@v3
@@ -115,7 +117,6 @@ jobs:
           path: Mobile/allure-results
           retention-days: 7
 
-      # Fazendo upload de logs em caso de falha
       - name: Upload Logs
         if: failure()
         uses: actions/upload-artifact@v3
