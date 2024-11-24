@@ -24,13 +24,13 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
+        working-directory: Mobile  # Definir o working-directory para a pasta Mobile
 
       - name: Install dependencies
         run: |
-          cd Mobile
           npm ci
           npm install -g appium
-        working-directory: Mobile
+        working-directory: Mobile  # Garantir que as dependências sejam instaladas na pasta Mobile
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -72,14 +72,14 @@ jobs:
         run: |
           appium driver install uiautomator2
           appium driver list
-        working-directory: Mobile
+        working-directory: Mobile  # Garantir que os drivers sejam instalados na pasta Mobile
 
       - name: Start Appium Server
         run: |
           appium --log-level debug &
           echo "Waiting for Appium to start..."
-          sleep 15  # Aumentado o tempo de espera
-        working-directory: Mobile
+          sleep 30  # Aumentado para garantir que o Appium esteja pronto
+        working-directory: Mobile  # Iniciar o Appium na pasta Mobile
 
       # Verificação mais robusta do status
       - name: Verify Environment
@@ -93,19 +93,20 @@ jobs:
           echo "Listing installed packages..."
           adb shell pm list packages | grep -i ebac || true
         continue-on-error: true
+        working-directory: Mobile  # Verificar o status dentro da pasta Mobile
 
       - name: Run Mobile Tests
         run: |
           echo "Starting tests..."
           npm test
-        working-directory: Mobile
+        working-directory: Mobile  # Garantir que os testes sejam executados na pasta Mobile
         env:
           CI: true
 
       - name: Generate Allure Report
         if: always()
         run: npm run allure
-        working-directory: Mobile
+        working-directory: Mobile  # Gerar o relatório Allure na pasta Mobile
 
       - name: Upload Allure Results
         if: always()
