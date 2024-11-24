@@ -27,6 +27,7 @@ jobs:
 
       - name: Install dependencies
         run: |
+          cd Mobile
           npm ci
           npm install -g appium
         working-directory: Mobile
