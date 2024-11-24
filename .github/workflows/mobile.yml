@@ -17,23 +17,18 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 2. Navegar para a pasta Mobile
-      - name: Navigate to Mobile Tests Directory
-        run: cd TCC-EBAC-QE/Mobile
-
-      # 3. Configurar Node.js
+      # 2. Configurar Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '16'
 
-      # 4. Instalar dependências do projeto Mobile
+      # 3. Instalar dependências
       - name: Install dependencies
-        run: |
-          cd TCC-EBAC-QE/Mobile
-          npm install
+        run: npm install
+        working-directory: Mobile
 
-      # 5. Configurar emulador Android
+      # 4. Configurar emulador Android
       - name: Setup Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -43,35 +38,31 @@ jobs:
           profile: Nexus 6
           script: adb devices
 
-      # 6. Instalar drivers do Appium
+      # 5. Instalar drivers do Appium
       - name: Install Appium Drivers
-        run: |
-          cd TCC-EBAC-QE/Mobile
-          npx appium driver install uiautomator2
+        run: npx appium driver install uiautomator2
+        working-directory: Mobile
 
-      # 7. Iniciar o servidor Appium
+      # 6. Iniciar o servidor Appium
       - name: Start Appium Server
-        run: |
-          cd TCC-EBAC-QE/Mobile
-          npx appium --log-level error &
+        run: npx appium --log-level error &
+        working-directory: Mobile
         env:
           PATH: ${{ env.PATH }}:./node_modules/.bin
 
-      # 8. Executar os testes Mobile
+      # 7. Executar os testes Mobile
       - name: Run Mobile Tests
-        run: |
-          cd TCC-EBAC-QE/Mobile
-          npm test
+        run: npm test
+        working-directory: Mobile
 
-      # 9. Gerar relatórios Allure (opcional)
+      # 8. Gerar relatórios Allure (opcional)
       - name: Generate Allure Report
-        run: |
-          cd TCC-EBAC-QE/Mobile
-          npm run allure
+        run: npm run allure
+        working-directory: Mobile
 
-      # 10. Fazer upload dos resultados Allure como artifacts (opcional)
+      # 9. Fazer upload dos resultados Allure como artifacts (opcional)
       - name: Upload Allure Results
         uses: actions/upload-artifact@v3
         with:
           name: allure-results
-          path: TCC-EBAC-QE/Mobile/allure-results
+          path: Mobile/allure-results
