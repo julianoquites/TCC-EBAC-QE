@@ -11,33 +11,37 @@ on:
 jobs:
   run-mobile-tests:
     runs-on: ubuntu-latest
-    timeout-minutes: 60  # Aumentado para dar mais tempo
+    timeout-minutes: 60  # Aumentado para garantir tempo suficiente
 
     steps:
+      # Fazendo o checkout do código
       - name: Checkout code
         uses: actions/checkout@v3
         with:
           lfs: true
 
+      # Configurando o ambiente Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '18'
           cache: 'npm'
 
+      # Instalando dependências do projeto e Appium
       - name: Install dependencies
         run: |
           cd Mobile
           npm ci
           npm install -g appium
 
+      # Configurando Java para o ambiente Android
       - name: Setup Java
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
           java-version: '11'
 
-      # Melhorias na configuração do emulador
+      # Configurando o emulador Android com ajustes personalizados
       - name: Setup and Run Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
@@ -45,69 +49,64 @@ jobs:
           target: google_apis
           arch: x86_64
           profile: Nexus 6
-          cores: 2              # Número de cores para o emulador
-          ram-size: 2048M       # Tamanho da RAM
-          heap-size: 512M       # Tamanho do heap
-          sdcard-path-size: 512M # Tamanho do SDCard
-          disk-size: 2048M      # Tamanho do disco
-          emulator-boot-timeout: 900 # 15 minutos de timeout
-          script: |
-            echo "Starting emulator boot sequence..."
-            adb devices
-            echo "Waiting for device to boot completely..."
-            adb wait-for-device
-            adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
-            sleep 30  # Espera adicional para garantir
-            echo "Configuring device settings..."
-            adb shell settings put global window_animation_scale 0.0
-            adb shell settings put global transition_animation_scale 0.0
-            adb shell settings put global animator_duration_scale 0.0
-            echo "Device is ready!"
-            adb shell getprop ro.build.version.release
-            adb shell getprop ro.build.version.sdk
-            adb devices
+          cores: 2
+          ram-size: 2048M
+          heap-size: 512M
+          sdcard-path-size: 512M
+          disk-size: 2048M
+          emulator-boot-timeout: 900
+        run: |
+          echo "Waiting for emulator to boot completely..."
+          adb devices
+          adb wait-for-device
+          adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
+          sleep 30
+          echo "Optimizing device animations..."
+          adb shell settings put global window_animation_scale 0.0
+          adb shell settings put global transition_animation_scale 0.0
+          adb shell settings put global animator_duration_scale 0.0
 
+      # Instalando drivers do Appium
       - name: Install Appium Drivers
         run: |
           cd Mobile
           appium driver install uiautomator2
           appium driver list
 
+      # Inicializando o servidor Appium
       - name: Start Appium Server
         run: |
           cd Mobile
           appium --log-level debug &
           echo "Waiting for Appium to start..."
-          sleep 30  # Aumentado para garantir que o Appium esteja pronto
+          sleep 30
 
-      # Verificação mais robusta do status
+      # Verificação do ambiente configurado
       - name: Verify Environment
         run: |
-          cd Mobile
-          echo "Checking ADB devices..."
+          echo "Verifying environment..."
           adb devices
-          echo "Checking Appium status..."
-          curl --retry 3 --retry-delay 5 http://localhost:4723/status || true
-          echo "Checking device properties..."
           adb shell getprop ro.build.version.release
-          echo "Listing installed packages..."
           adb shell pm list packages | grep -i ebac || true
+          curl --retry 3 --retry-delay 5 http://localhost:4723/status || true
         continue-on-error: true
 
+      # Executando os testes
       - name: Run Mobile Tests
         run: |
           cd Mobile
-          echo "Starting tests..."
           npm test
         env:
           CI: true
 
+      # Gerando relatório Allure
       - name: Generate Allure Report
         if: always()
         run: |
           cd Mobile
           npm run allure
 
+      # Fazendo upload dos resultados do Allure
       - name: Upload Allure Results
         if: always()
         uses: actions/upload-artifact@v3
@@ -116,6 +115,7 @@ jobs:
           path: Mobile/allure-results
           retention-days: 7
 
+      # Fazendo upload de logs em caso de falha
       - name: Upload Logs
         if: failure()
         uses: actions/upload-artifact@v3
