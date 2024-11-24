@@ -24,13 +24,12 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-        working-directory: Mobile  # Definir o working-directory para a pasta Mobile
 
       - name: Install dependencies
         run: |
+          cd Mobile
           npm ci
           npm install -g appium
-        working-directory: Mobile  # Garantir que as dependências sejam instaladas na pasta Mobile
 
       - name: Setup Java
         uses: actions/setup-java@v3
@@ -70,20 +69,21 @@ jobs:
 
       - name: Install Appium Drivers
         run: |
+          cd Mobile
           appium driver install uiautomator2
           appium driver list
-        working-directory: Mobile  # Garantir que os drivers sejam instalados na pasta Mobile
 
       - name: Start Appium Server
         run: |
+          cd Mobile
           appium --log-level debug &
           echo "Waiting for Appium to start..."
           sleep 30  # Aumentado para garantir que o Appium esteja pronto
-        working-directory: Mobile  # Iniciar o Appium na pasta Mobile
 
       # Verificação mais robusta do status
       - name: Verify Environment
         run: |
+          cd Mobile
           echo "Checking ADB devices..."
           adb devices
           echo "Checking Appium status..."
@@ -93,20 +93,20 @@ jobs:
           echo "Listing installed packages..."
           adb shell pm list packages | grep -i ebac || true
         continue-on-error: true
-        working-directory: Mobile  # Verificar o status dentro da pasta Mobile
 
       - name: Run Mobile Tests
         run: |
+          cd Mobile
           echo "Starting tests..."
           npm test
-        working-directory: Mobile  # Garantir que os testes sejam executados na pasta Mobile
         env:
           CI: true
 
       - name: Generate Allure Report
         if: always()
-        run: npm run allure
-        working-directory: Mobile  # Gerar o relatório Allure na pasta Mobile
+        run: |
+          cd Mobile
+          npm run allure
 
       - name: Upload Allure Results
         if: always()
