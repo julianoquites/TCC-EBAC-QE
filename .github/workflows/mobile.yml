@@ -11,58 +11,116 @@ on:
 jobs:
   run-mobile-tests:
     runs-on: ubuntu-latest
+    timeout-minutes: 60  # Aumentado para dar mais tempo
 
     steps:
-      # 1. Checkout do código
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          lfs: true
 
-      # 2. Configurar Node.js
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16'
+          node-version: '18'
+          cache: 'npm'
 
-      # 3. Instalar dependências
       - name: Install dependencies
-        run: npm install
+        run: |
+          npm ci
+          npm install -g appium
         working-directory: Mobile
 
-      # 4. Configurar emulador Android
-      - name: Setup Android Emulator
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '11'
+
+      # Melhorias na configuração do emulador
+      - name: Setup and Run Android Emulator
         uses: reactivecircus/android-emulator-runner@v2
         with:
           api-level: 28
           target: google_apis
           arch: x86_64
           profile: Nexus 6
-          script: adb devices
+          cores: 2              # Número de cores para o emulador
+          ram-size: 2048M       # Tamanho da RAM
+          heap-size: 512M       # Tamanho do heap
+          sdcard-path-size: 512M # Tamanho do SDCard
+          disk-size: 2048M      # Tamanho do disco
+          emulator-boot-timeout: 900 # 15 minutos de timeout
+          script: |
+            echo "Starting emulator boot sequence..."
+            adb devices
+            echo "Waiting for device to boot completely..."
+            adb wait-for-device
+            adb shell 'while [[ -z $(getprop sys.boot_completed) ]]; do sleep 1; done'
+            sleep 30  # Espera adicional para garantir
+            echo "Configuring device settings..."
+            adb shell settings put global window_animation_scale 0.0
+            adb shell settings put global transition_animation_scale 0.0
+            adb shell settings put global animator_duration_scale 0.0
+            echo "Device is ready!"
+            adb shell getprop ro.build.version.release
+            adb shell getprop ro.build.version.sdk
+            adb devices
 
-      # 5. Instalar drivers do Appium
       - name: Install Appium Drivers
-        run: npx appium driver install uiautomator2
+        run: |
+          appium driver install uiautomator2
+          appium driver list
         working-directory: Mobile
 
-      # 6. Iniciar o servidor Appium
       - name: Start Appium Server
-        run: npx appium --log-level error &
+        run: |
+          appium --log-level debug &
+          echo "Waiting for Appium to start..."
+          sleep 15  # Aumentado o tempo de espera
+        working-directory: Mobile
+
+      # Verificação mais robusta do status
+      - name: Verify Environment
+        run: |
+          echo "Checking ADB devices..."
+          adb devices
+          echo "Checking Appium status..."
+          curl --retry 3 --retry-delay 5 http://localhost:4723/status || true
+          echo "Checking device properties..."
+          adb shell getprop ro.build.version.release
+          echo "Listing installed packages..."
+          adb shell pm list packages | grep -i ebac || true
+        continue-on-error: true
+
+      - name: Run Mobile Tests
+        run: |
+          echo "Starting tests..."
+          npm test
         working-directory: Mobile
         env:
-          PATH: ${{ env.PATH }}:./node_modules/.bin
+          CI: true
 
-      # 7. Executar os testes Mobile
-      - name: Run Mobile Tests
-        run: npm test
-        working-directory: Mobile
-
-      # 8. Gerar relatórios Allure (opcional)
       - name: Generate Allure Report
+        if: always()
         run: npm run allure
         working-directory: Mobile
 
-      # 9. Fazer upload dos resultados Allure como artifacts (opcional)
       - name: Upload Allure Results
+        if: always()
         uses: actions/upload-artifact@v3
         with:
           name: allure-results
           path: Mobile/allure-results
+          retention-days: 7
+
+      - name: Upload Logs
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: debug-logs
+          path: |
+            Mobile/logs
+            Mobile/test-output
+            ${{ github.workspace }}/**/appium.log
+          retention-days: 7
