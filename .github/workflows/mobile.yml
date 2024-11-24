@@ -1,0 +1,77 @@
+name: Run Mobile Tests with Appium
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  run-mobile-tests:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout do código
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # 2. Navegar para a pasta Mobile
+      - name: Navigate to Mobile Tests Directory
+        run: cd TCC-EBAC-QE/Mobile
+
+      # 3. Configurar Node.js
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      # 4. Instalar dependências do projeto Mobile
+      - name: Install dependencies
+        run: |
+          cd TCC-EBAC-QE/Mobile
+          npm install
+
+      # 5. Configurar emulador Android
+      - name: Setup Android Emulator
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 28
+          target: google_apis
+          arch: x86_64
+          profile: Nexus 6
+          script: adb devices
+
+      # 6. Instalar drivers do Appium
+      - name: Install Appium Drivers
+        run: |
+          cd TCC-EBAC-QE/Mobile
+          npx appium driver install uiautomator2
+
+      # 7. Iniciar o servidor Appium
+      - name: Start Appium Server
+        run: |
+          cd TCC-EBAC-QE/Mobile
+          npx appium --log-level error &
+        env:
+          PATH: ${{ env.PATH }}:./node_modules/.bin
+
+      # 8. Executar os testes Mobile
+      - name: Run Mobile Tests
+        run: |
+          cd TCC-EBAC-QE/Mobile
+          npm test
+
+      # 9. Gerar relatórios Allure (opcional)
+      - name: Generate Allure Report
+        run: |
+          cd TCC-EBAC-QE/Mobile
+          npm run allure
+
+      # 10. Fazer upload dos resultados Allure como artifacts (opcional)
+      - name: Upload Allure Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: allure-results
+          path: TCC-EBAC-QE/Mobile/allure-results
