@@ -13,7 +13,6 @@ export const config = {
       "appium:deviceName": "ebac",
       "appium:platformVersion": "9.0",
       "appium:automationName": "UiAutomator2",
-      "appium:app": "./app/ebacshop.apks",
       "appium:appPackage": "br.com.lojaebac",
       "appium:appActivity": "br.com.lojaebac.MainActivity",
       "appium:autoGrantPermissions": true,
