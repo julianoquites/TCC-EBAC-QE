@@ -1,10 +1,13 @@
 const request = require("supertest");
 const { faker } = require("@faker-js/faker");
+const {
+  couponSchema,
+  couponsListSchema,
+} = require("../contracts/coupons.contract");
 const baseUrl = "http://lojaebac.ebaconline.art.br";
+const basicAuthToken = "Basic YWRtaW5fZWJhYzpAYWRtaW4hJmJAYyEyMDIy";
 
 describe("API de Cupons", () => {
-  const basicAuthToken = "Basic YWRtaW5fZWJhYzpAYWRtaW4hJmJAYyEyMDIy";
-
   describe("GET /wc/v3/coupons", () => {
     it("Deve listar todos os cupons cadastrados", async () => {
       const res = await request(baseUrl)
@@ -13,6 +16,9 @@ describe("API de Cupons", () => {
 
       expect(res.status).toBe(200);
       expect(Array.isArray(res.body)).toBe(true);
+
+      const { error } = couponsListSchema.validate(res.body);
+      expect(error).toBeUndefined();
     });
 
     it("Deve buscar um cupom por ID", async () => {
@@ -23,6 +29,9 @@ describe("API de Cupons", () => {
 
       expect(res.status).toBe(200);
       expect(res.body.id).toBe(couponId);
+
+      const { error } = couponSchema.validate(res.body);
+      expect(error).toBeUndefined();
     });
   });
 
@@ -43,11 +52,14 @@ describe("API de Cupons", () => {
 
       expect(res.status).toBe(201);
       expect(res.body.code.toLowerCase()).toBe(newCoupon.code.toLowerCase());
+
+      const { error } = couponSchema.validate(res.body);
+      expect(error).toBeUndefined();
     });
 
     it("Não deve permitir duplicidade de código de cupom", async () => {
       const duplicateCoupon = {
-        code: "Ganhe10", // Código já existente
+        code: "Ganhe10",
         amount: "10.00",
         discount_type: "fixed_product",
         description: "Cupom duplicado",
