@@ -1,4 +1,4 @@
-name: Deploy Mochawesome Report to GitHub Pages
+name: Integração Contínua UI
 
 on:
   push:
