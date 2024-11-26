@@ -1,0 +1,17 @@
+{
+  "name": "performance-tests",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "test:performance": "k6 run src/scenarios/main.js",
+    "test:performance:report": "k6 run src/scenarios/main.js --out json=reports/results.json"
+  },
+  "dependencies": {
+    "k6": "^0.0.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
